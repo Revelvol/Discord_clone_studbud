@@ -5,4 +5,7 @@ class RoomForm(ModelForm):
     class Meta:
         model = Room #mesti model
         fields = '__all__'
+        exclude =[
+            'host','participants'
+        ]
 
