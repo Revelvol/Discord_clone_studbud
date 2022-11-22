@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.http import HttpResponse
 from .models import Room, Topic , Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -42,6 +42,18 @@ def userProfile(request,pk):
     topics = Topic.objects.all()
     context = {'user':user, 'rooms' : rooms, 'room_messages' : room_messages, 'topics' : topics}
     return render (request, 'base/profile.html', context)
+@login_required(login_url = 'login')
+def editProfile(request):
+
+    user = request.user
+    form = UserForm(instance= user )
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance= user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk = user.id)
+    context = {'form':form}
+    return render (request, 'base/edit_user.html' ,context)
 def logoutUser(request):
     logout(request)
     return redirect('home')
@@ -73,8 +85,11 @@ def home(request):
                                 ) #search by 3 define value
     room_count = rooms.count() #jadi count room yang udh difilter, count lbh cepet drpada len
     topics = Topic.objects.all()
-    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
-    context = {'rooms':rooms, 'topics':topics, 'room_count': room_count, 'room_messages': room_messages}
+    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q)
+
+
+                                           )
+    context = {'rooms':rooms, 'topics':topics , 'room_count': room_count, 'room_messages': room_messages}
     return render(request,"base/home.html",context) #liat passing rooms ini
     #oleh karena masukin dict, jadi room dapat diakses
 def room(request,pk):
@@ -98,29 +113,48 @@ def room(request,pk):
 @login_required(login_url = 'login')
 def createRoom(request):
     form = RoomForm() #kok kyk ini ga ush ya wkkwkwk
+    topics = Topic.objects.all()
     if request.method == 'POST':
+        topic_name = request.POST.get('topic')
+        topic, create = Topic.objects.get_or_create(name = topic_name) #allow user to get or create based on given input
         form = RoomForm(request.POST)
+        Room.objects.create(
+            host = request.user,
+            topic = topic,
+            name = request.POST.get('name'),
+            description = request.POST.get('description')
+        )
+        return redirect('home')
+        '''
         if form.is_valid():
             room = form.save(commit = False)
             room.host = request.user
             room.save()
-            return redirect('home')
+            return redirect('home') '''
 
-    context = {'form':form}
+    context = {'form':form , 'topics' : topics }
     return render(request, 'base/room_form.html',context)
 
 @login_required(login_url = 'login')
 def updateRoom(request,pk):
     room = Room.objects.get(id=pk)
+    topics = Topic.objects.all()
     form = RoomForm(instance=room)
     if request.user != room.host:
         return HttpResponse("You dont have this room access !!! ")
     if request.method == 'POST':
+        topic_name = request.POST.get('topic')
+        topic, create = Topic.objects.get_or_create(name=topic_name)
+        room.name  = request.POST.get('name')
+        room.topic = topic
+        room.description = request.POST.get('description')
         form = RoomForm(request.POST,instance=room)
-        if form.is_valid():
+        room.save()
+        return redirect('home')
+        '''  if form.is_valid():
             form.save()
-            return redirect('home')
-    context = {'form':form}
+            return redirect('home')'''
+    context = {'form':form,'topics' : topics , 'room':room }
     return render(request, 'base/room_form.html', context)
 
 @login_required(login_url = 'login')
@@ -143,3 +177,7 @@ def deleteMessage(request,pk):
         message.delete()
         return redirect('home')
     return render(request, 'base/delete.html',  {'obj':message})
+
+def topicsPage(request):
+    context = {}
+    return render(request, 'base/topics.html', context)
