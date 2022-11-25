@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from ..models import Room
 
 @api_view (['GET'])
 def getRoutes(request):
@@ -7,6 +8,5 @@ def getRoutes(request):
     return Response(routes)
 @api_view(['GET'])
 def getRooms(request):
-    """rooms = Room.objects.all()  #query the database
-    return Response(rooms)"""
-    pass
+    rooms = Room.objects.all()  #query the database
+    return Response(rooms)
