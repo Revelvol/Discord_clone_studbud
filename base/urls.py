@@ -14,6 +14,6 @@ urlpatterns = [
     path('profile/<str:pk>/',views.userProfile, name= "user-profile"),
     path('edit_profile/',views.editProfile, name= "edit-profile"),
     path('topics/',views.topicsPage, name= "topics"),
-    path('activities/',views.editProfile, name= "mobile-activity")
+    path('activities/',views.activityPage, name= "activity")
     #notice gara gara name, gw bisa ganti url ez
 ]

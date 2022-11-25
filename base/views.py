@@ -84,11 +84,8 @@ def home(request):
         Q(description__icontains=q)
                                 ) #search by 3 define value
     room_count = rooms.count() #jadi count room yang udh difilter, count lbh cepet drpada len
-    topics = Topic.objects.all()
-    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q)
-
-
-                                           )
+    topics = Topic.objects.all()[0:5]
+    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
     context = {'rooms':rooms, 'topics':topics , 'room_count': room_count, 'room_messages': room_messages}
     return render(request,"base/home.html",context) #liat passing rooms ini
     #oleh karena masukin dict, jadi room dapat diakses
@@ -179,5 +176,15 @@ def deleteMessage(request,pk):
     return render(request, 'base/delete.html',  {'obj':message})
 
 def topicsPage(request):
-    context = {}
+    if request.GET.get('q') == None:
+        q = ''
+    else:
+        q = request.GET.get('q')
+    topics = Topic.objects.filter(name__icontains=q )
+
+    context = {"topics": topics}
     return render(request, 'base/topics.html', context)
+def activityPage(request):
+    room_messages = Message.objects.all()[0:2]
+    context = {'room_messages':room_messages}
+    return render(request, 'base/activity.html', context)
