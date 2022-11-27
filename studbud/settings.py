@@ -39,13 +39,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'base.apps.BaseConfig',
     'rest_framework',
+    "corsheaders",
 
 ]
 
+AUTH_USER_MODEL ='base.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    "corsheaders.middleware.CorsMiddleware",
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -126,8 +131,11 @@ STATICFILES_DIR = [
     BASE_DIR/'static'
 ]
 #STATIC_ROOT =
-
+MEDIA_URL = '/images/'
+MEDIA_ROOT = BASE_DIR/'base/static/images' # biasa pake s3 bucket aws
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS = True  #bikin semua orang bisa akses the api
